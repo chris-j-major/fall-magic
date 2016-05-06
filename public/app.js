@@ -32,11 +32,12 @@
   );
   notesDOM( notes );
   $toolbox.on("mousedown touchstart",".notes",function(event){
-  event.preventDefault();
+    event.preventDefault();
     // start draggin these notes
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
     var note = notes[index];
     startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event );
+    musicPlayer.play("/dynamic/notes/"+note.title+".midi");
     return false;
   })
 
