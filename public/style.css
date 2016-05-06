@@ -1,0 +1,33 @@
+htmp, body{
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+
+#toolbar {
+  height:2em;
+  position:fixed;
+  top:0px;
+  width:100%;
+  background-color: red;
+}
+
+#main {
+  top:2em;
+  position:fixed;
+}
+
+#toolbox {
+  background-color: blue;
+  top:0px;
+  width:12em;
+  position:absolute;
+}
+
+#compose {
+  background-color: green;
+  top:0px;
+  margin-left:12em;
+  width:100%;
+  position:absolute;
+}
