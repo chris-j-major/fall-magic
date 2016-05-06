@@ -23,6 +23,17 @@ function inner(){
     this.phrases = [];
     this.key = "C";
   }
+  Composition.prototype.toJSON = function(){
+    return {
+      key:this.key,
+      phrases:this.phrases.map(function(p){
+        return {
+          pitch:p.pitch,
+          notes:p.notes.title
+        }
+      })
+    }
+  }
 
   return {
     Notes,Notes,

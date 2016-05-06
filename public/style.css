@@ -12,6 +12,13 @@ htmp, body{
   background-color: #aaa;
 }
 
+#toolbar button {
+  height:100%;
+  padding-left:8px;
+  padding-right:8px;
+  border-radius: 2px;
+}
+
 #main {
   top:2em;
   position:fixed;

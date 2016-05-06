@@ -1,6 +1,5 @@
 var express = require('express');
-var stream = require('stream');
-var through = require('through');
+var async = require('async');
 var route = express.Router();
 
 var database = require("./database");
@@ -17,7 +16,7 @@ route.get("/notes/:id.json",function(req,res,next){
     if ( notes ){
       res.send(notes);
     }else{
-      res.status(400).send(notes);
+      res.status(404).send(notes);
     }
   });
 });
@@ -28,22 +27,36 @@ route.get("/notes/:id.midi",function(req,res,next){
     if ( notes ){
       res.status(200).send( new Buffer( play.toBytes( notes ) ,'binary') );
     }else{
-      res.status(400).send(notes);
+      res.status(404).send(null);
     }
   });
 });
 
-function buildThroughStream(){
-  return through(function write(data) {
-      this.emit('data', data);
-    },
-    function end () { //optional
-      this.emit('end');
-    })
-}
-
-route.post("/toMidi",function(req,res,next){
-  res.status(404).send();
+route.get("/toMidi/:data",function(req,res,next){
+  res.setHeader("content-type", "audio/midi");
+  var data = JSON.parse(req.params.data);
+  var phraseSet = {};
+  var phraseList = [];
+  data.phrases.map(function(p){
+    if ( phraseSet[p.notes] == null ){
+      phraseSet[p.notes] = {};
+      phraseList.push( loadPhrases(p.notes) );
+    }
+  });
+  function loadPhrases(id){
+    return function(callback){
+      database.getNoteSet( id , function(notes){
+        phraseSet[id] = notes;
+        callback();
+      });
+    }
+  }
+  async.parallel( phraseList , function(){
+    data.phrases = data.phrases.map(function(p){
+      return { notes: phraseSet[p.notes].notes , pitch:p.pitch };
+    });
+    res.status(200).send( new Buffer( play.toBytes( data ) ,'binary') );
+  });
 });
 
 module.exports = route;

@@ -118,7 +118,10 @@
     })
     .fail(function() {
       window.msg.error( "error loading notes" );
-    })
+    });
+  $("#play").on('click',function(){
+    musicPlayer.play("/dynamic/toMidi/"+JSON.stringify(activeComposition.toJSON()) );
+  });
 })();
 
 function newDOMBinding( $parent , create , update ){

@@ -10,15 +10,20 @@ module.exports = {
     file.addTrack(track);
 
     if ( composition.notes ){
-      addNotes( composition.notes );
+      addNotes( composition.notes , 0 );
+    }else if ( composition.phrases ){
+      for ( var i=0;i<composition.phrases.length;i++){
+        var phrase = composition.phrases[i];
+        addNotes( phrase.notes , 0 );
+      }
     }
 
-    function addNotes( notes ){
+    function addNotes( notes , shift ){
       for ( var i=0 ; i<notes.length ; i++ ){
         // splitthe noite syntax.
         var match = notes[i].match( noteMatcher );
         if ( match ){
-          var length = parseInt(match[3]) * 32;
+          var length = parseInt(match[3]) * 64;
           var note = match[1];
           var octave = match[2]|"4";
           var combine = note.toUpperCase()+octave;
