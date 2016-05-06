@@ -32,6 +32,23 @@ htmp, body{
   position:absolute;
 }
 
+#dragOutline {
+  border:2px dashed black;
+  width:6em;
+  height:2em;
+  position: absolute;
+}
+#dragOutline.hidden {
+  display:none;
+}
+
+#offsetSpacer{
+  width:6em;
+  height:2em;
+  position:absolute;
+  display:none;
+}
+
 .notes {
   background-color: blue;
   border: 1px solid black;
@@ -48,7 +65,6 @@ htmp, body{
   border: 1px solid black;
   padding:2px;
   height:2em;
-  margin: 12px;
-  width: 4em;
+  width: 5em;
   box-shadow: 10px 10px 5px #888888;
 }
