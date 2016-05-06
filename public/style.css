@@ -9,7 +9,7 @@ htmp, body{
   position:fixed;
   top:0px;
   width:100%;
-  background-color: red;
+  background-color: #aaa;
 }
 
 #main {
@@ -18,16 +18,37 @@ htmp, body{
 }
 
 #toolbox {
-  background-color: blue;
+  background-color: #aaa;
   top:0px;
   width:12em;
   position:absolute;
 }
 
 #compose {
-  background-color: green;
+  background-color: #ddd;
   top:0px;
   margin-left:12em;
   width:100%;
   position:absolute;
+}
+
+.notes {
+  background-color: blue;
+  border: 1px solid black;
+  padding:2px;
+  height:2em;
+  margin: 12px;
+  color:white;
+  box-shadow: 4px 4px 4px #888888;
+}
+
+.phrase { /* used in the composition */
+  position:absolute; /* positioned via code... */
+  background-color: white;
+  border: 1px solid black;
+  padding:2px;
+  height:2em;
+  margin: 12px;
+  width: 4em;
+  box-shadow: 10px 10px 5px #888888;
 }

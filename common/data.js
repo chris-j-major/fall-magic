@@ -5,15 +5,20 @@ if ( window.module != null ){
 }
 
 function inner(){
-  function Notes(){
+  function Notes( data ){
+    if ( ! data ) data = {};
     /* some notes, 4 bars etc. */
+    this.title = data.title||"[unnamed]";
     this.notes = [];
   }
-  function Phrase(){
+  function Phrase(data ){
+    if ( ! data ) data = {};
     /* a block of music, positioned and keyed */
-    this.pitch = 12;
+    this.pitch = data.pitch||4;
+    this.notes = data.notes;
   }
-  function Composition(){
+  function Composition( data ){
+    if ( ! data ) data = {};
     /* a collection of phrases and metadata */
     this.phrases = [];
     this.key = "C";
