@@ -10,6 +10,8 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.13.4",
-    "socketio": "^1.0.0"
+    "jsmidgen": "^0.1.5",
+    "morgan": "^1.7.0",
+    "through": "^2.3.8"
   }
 }

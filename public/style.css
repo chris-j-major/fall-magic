@@ -68,3 +68,29 @@ htmp, body{
   width: 5em;
   box-shadow: 10px 10px 5px #888888;
 }
+
+/* dalog stuff */
+#dialog {
+  top:0;
+  left:0;
+  position:absolute;
+  width:100%;
+  height:100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+#dialog .innerBox {
+  position:absolute;
+  width:80%;
+  margin-left:10%;
+  margin-right:10%;
+  margin-top:10%;
+  border:2px solid black;
+  border-radius: 8px;
+  background-color: white;
+  padding:12px;
+  box-shadow: 10px 10px 5px #000000;
+}
+#dialog.hidden {
+  display: none;
+}

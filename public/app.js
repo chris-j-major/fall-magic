@@ -8,35 +8,8 @@
   var $offsetSpacer = $("#offsetSpacer");
 
   var activeComposition = new data.Composition();
-  var notes = [
-    new data.Notes({
-      title:"A",
-    }) ,
-    new data.Notes({
-      title:"B",
-    }) ,
-    new data.Notes({
-      title:"C",
-    })];
+  var notes = [];
 
-  activeComposition.phrases = [
-    new data.Phrase({
-      pitch:1,
-      notes: notes[0]
-    }) ,
-    new data.Phrase({
-      pitch:2,
-      notes: notes[1]
-    }) ,
-    new data.Phrase({
-      pitch:2,
-      notes: notes[1]
-    }) ,
-    new data.Phrase({
-      pitch:1,
-      notes: notes[2]
-    })
-  ];
 
   function resize(){
     var height = $(window).height();
@@ -99,7 +72,7 @@
     $(window).on("mouseup touchend",dragMouseUp);
     $dragOutline.removeClass("hidden");
   }
-  
+
   function dragMouseOver(event){
     event.preventDefault();
     $dragOutline.css({ left:event.pageX, top:event.pageY });
@@ -125,12 +98,26 @@
         activeComposition.phrases.splice(index,0,draggingPhrase);
       }
       compositionDOM( activeComposition.phrases ); // update the display
+    }else{
+      // not on the main canvas... so
+
     }
     draggingPhrase = null;
   }
 
   $(document).ready(resize);
   $(window).resize(resize);
+
+  var msgId = window.msg.normal("Loading","please wait...")
+  $.get("/dynamic/notes")
+    .done(function(data) {
+      notes = data;
+      notesDOM( notes );
+      window.msg.clear( msgId );
+    })
+    .fail(function() {
+      window.msg.error( "error loading notes" );
+    })
 })();
 
 function newDOMBinding( $parent , create , update ){

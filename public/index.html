@@ -3,7 +3,9 @@
     <title>Fall Magic</title>
     <link rel="stylesheet" type="text/css" href="/public/style.css">
     <script src="/common/data.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src='/public/lib/midi.js'></script>
+    <script src="/public/lib/jquery.min.js"></script>
+    <script src="/public/dialog.js"></script>
   </head>
   <body>
     <div id="toolbar"></div>
@@ -15,6 +17,12 @@
     </div>
     <div id="dragOutline" class="hidden"></div>
     <div id="offsetSpacer"></div>
+    <div id="dialog" class="background hidden">
+      <div class="innerBox">
+        <h1 id="dialog-title">Hello</h1>
+        <p id="dialog-text"></p>
+      </div>
+    </div>
   </body>
   <script src="/public/app.js"></script>
 </html>
