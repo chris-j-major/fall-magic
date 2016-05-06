@@ -58,7 +58,7 @@
     }
   );
   notesDOM( notes );
-  $toolbox.on("mousedown",".notes",function(event){
+  $toolbox.on("mousedown touchstart",".notes",function(event){
   event.preventDefault();
     // start draggin these notes
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
@@ -79,7 +79,7 @@
     }
   );
   compositionDOM( activeComposition.phrases );
-  $compose.on("mousedown",".phrase",function(event){
+  $compose.on("mousedown touchstart",".phrase",function(event){
     // start draggin these notes
     event.preventDefault();
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
@@ -96,10 +96,10 @@
     draggingPhrase = phrase;
     $dragOutline.css({ left:event.pageX, top:event.pageY });
     $(window).on("mousemove",dragMouseOver);
-    $(window).on("mouseup",dragMouseUp);
+    $(window).on("mouseup touchend",dragMouseUp);
     $dragOutline.removeClass("hidden");
   }
-
+  
   function dragMouseOver(event){
     event.preventDefault();
     $dragOutline.css({ left:event.pageX, top:event.pageY });
