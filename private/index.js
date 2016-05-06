@@ -26,7 +26,7 @@ route.get("/notes/:id.midi",function(req,res,next){
   res.setHeader("content-type", "audio/midi");
   database.getNoteSet( req.params.id , function(notes){
     if ( notes ){
-      res.status(200).send( new Buffer( play.toBytes( notes.notes ) ,'binary') );
+      res.status(200).send( new Buffer( play.toBytes( notes ) ,'binary') );
     }else{
       res.status(400).send(notes);
     }

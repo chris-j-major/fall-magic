@@ -1,5 +1,7 @@
 var Midi = require('jsmidgen');
 
+var noteMatcher = /([A-F])([0-9]*)-([0-9]+)/i;
+
 module.exports = {
   toBytes:function( composition ){
 
@@ -7,32 +9,25 @@ module.exports = {
     var track = new Midi.Track();
     file.addTrack(track);
 
-    track.addNote(0, 'c4', 64);
-    track.addNote(0, 'd4', 64);
-    track.addNote(0, 'e4', 64);
-    track.addNote(0, 'f4', 64);
-    track.addNote(0, 'g4', 64);
-    track.addNote(0, 'a4', 64);
-    track.addNote(0, 'b4', 64);
-    track.addNote(0, 'c5', 64);
+    if ( composition.notes ){
+      addNotes( composition.notes );
+    }
 
-    track.addNote(0, 'c4', 64);
-    track.addNote(0, 'd4', 64);
-    track.addNote(0, 'e4', 64);
-    track.addNote(0, 'f4', 64);
-    track.addNote(0, 'g4', 64);
-    track.addNote(0, 'a4', 64);
-    track.addNote(0, 'b4', 64);
-    track.addNote(0, 'c5', 64);
-
-    track.addNote(0, 'c4', 64);
-    track.addNote(0, 'd4', 64);
-    track.addNote(0, 'e4', 64);
-    track.addNote(0, 'f4', 64);
-    track.addNote(0, 'g4', 64);
-    track.addNote(0, 'a4', 64);
-    track.addNote(0, 'b4', 64);
-    track.addNote(0, 'c5', 64);
+    function addNotes( notes ){
+      for ( var i=0 ; i<notes.length ; i++ ){
+        // splitthe noite syntax.
+        var match = notes[i].match( noteMatcher );
+        if ( match ){
+          var length = parseInt(match[3]) * 32;
+          var note = match[1];
+          var octave = match[2]|"4";
+          var combine = note.toUpperCase()+octave;
+          track.addNote(0,combine, length);
+        }else{
+          console.log("WTF:"+notes[i] );
+        }
+      }
+    }
 
     return file.toBytes();
   }
