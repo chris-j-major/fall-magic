@@ -2,6 +2,10 @@ var Midi = require('jsmidgen');
 
 var noteMatcher = /([A-F])([0-9]*)-([0-9]+)/i;
 
+const baseScale = "C,C#,D,D#,E,F,G,G#,A,A#,B,".split(",");
+
+//{ a:21, b:23, c:12, d:14, e:16, f:17, g:19 }
+
 module.exports = {
   toBytes:function( composition ){
 
@@ -14,7 +18,7 @@ module.exports = {
     }else if ( composition.phrases ){
       for ( var i=0;i<composition.phrases.length;i++){
         var phrase = composition.phrases[i];
-        addNotes( phrase.notes , 0 );
+        addNotes( phrase.notes , phrase.pitch );
       }
     }
 
@@ -26,7 +30,7 @@ module.exports = {
           var length = parseInt(match[3]) * 64;
           var note = match[1];
           var octave = match[2]|"4";
-          var combine = note.toUpperCase()+octave;
+          var combine = shift + baseScale.indexOf(note.toUpperCase())+(octave*12);
           track.addNote(0,combine, length);
         }else{
           console.log("WTF:"+notes[i] );
