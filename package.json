@@ -4,10 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": "5.9.1"
+  },
   "dependencies": {
     "async": "^2.0.0-rc.4",
     "express": "^4.13.4",
