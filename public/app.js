@@ -36,7 +36,7 @@
     // start draggin these notes
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
     var note = notes[index];
-    startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event );
+    startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event , {x:-event.offsetX,y:-event.offsetY} );
     musicPlayer.play("/dynamic/notes/"+note.title+".midi");
     return false;
   })
@@ -48,7 +48,8 @@
     },
     function updatePhrase( $parent , $elem , item , index ){
       $elem.text( item.notes.title )
-      $elem.css( {left: (index * 6)+"em" , top:(item.pitch*2)+"em" });
+      $elem.css( {left: (index*6)+"em" , top:(item.pitch*2)+"em" });
+      $elem.toggleClass("temp",item.temp)
       jQuery.data( $elem[0] , "index" , index );
     }
   );
@@ -58,25 +59,56 @@
     event.preventDefault();
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
     var phrase = activeComposition.phrases[index];
-    activeComposition.phrases.splice( index , 1 );
     compositionDOM( activeComposition.phrases ); // update the display...
-    startDrag( phrase ,event );
+    console.log(event);
+    startDrag( phrase ,event , {x:-event.offsetX,y:-event.offsetY} );
     return false;
   });
 
 
   var draggingPhrase = null;
-  function startDrag( phrase ,event ){
+  var dragOffset = null;
+  function startDrag( phrase ,event,offset ){
     draggingPhrase = phrase;
-    $dragOutline.css({ left:event.pageX, top:event.pageY });
-    $(window).on("mousemove",dragMouseOver);
-    $(window).on("mouseup touchend",dragMouseUp);
-    $dragOutline.removeClass("hidden");
+    draggingPhrase.temp = true;
+    dragOffset = offset;
+    $(window).on("mousemove",dragMouseOver).on("mouseup touchend",dragMouseUp);
+    $dragOutline.removeClass("hidden").css({ left:event.pageX+dragOffset.x, top:event.pageY+dragOffset.y });
   }
 
   function dragMouseOver(event){
     event.preventDefault();
-    $dragOutline.css({ left:event.pageX, top:event.pageY });
+    $dragOutline.css({ left:event.pageX+dragOffset.x, top:event.pageY+dragOffset.y });
+
+    /* work out where on the main canvas */
+    var x = event.pageX + dragOffset.x;
+    var y = event.pageY + dragOffset.y;
+    var target = $compose.offset();
+    var index = -1;
+    var updateRequired = false;
+    if ( x > target.left && y > target.top ){
+      // in the right box - hooray!
+      index = Math.round((x - target.left) / $offsetSpacer.width());
+      if ( index > activeComposition.phrases.length ){
+        index = activeComposition.phrases.length; // target index can't be too long
+      }
+      var pitch = Math.round((y - target.top) / $offsetSpacer.height());
+      draggingPhrase.pitch = pitch;
+      updateRequired = (draggingPhrase.pitch == pitch);
+    }
+    var curIndex = activeComposition.phrases.indexOf( draggingPhrase );
+    if ( curIndex != index ){ // index changed, update required
+      if ( curIndex !== -1 ){
+        activeComposition.phrases.splice(curIndex,1); // remove current
+      }
+      if ( index !== -1 ){
+        activeComposition.phrases.splice(index,0,draggingPhrase); // add new
+      }
+      updateRequired = true;
+    }
+    if ( updateRequired ){
+      compositionDOM( activeComposition.phrases ); // update the display]
+    }
   }
   function dragMouseUp(event){
     event.preventDefault();
@@ -84,26 +116,11 @@
     $(window).off("mouseup",dragMouseUp);
     $dragOutline.addClass("hidden");
 
-    /* work out where on the main canvas */
-    var x = event.pageX;
-    var y = event.pageY;
-    var target = $compose.offset();
-    if ( x > target.left && y > target.top ){
-      // in the right box - hooray!
-      var index = Math.round((x - target.left) / $offsetSpacer.width());
-      var pitch = Math.round((y - target.top) / $offsetSpacer.height());
-      draggingPhrase.pitch = pitch;
-      if ( index > activeComposition.phrases.length ){
-        activeComposition.phrases.push(draggingPhrase);
-      }else{
-        activeComposition.phrases.splice(index,0,draggingPhrase);
-      }
-      compositionDOM( activeComposition.phrases ); // update the display
-    }else{
-      // not on the main canvas... so
-
-    }
+    // clear the drag settings
+    draggingPhrase.temp = false;
     draggingPhrase = null;
+
+    compositionDOM( activeComposition.phrases ); // update the display]
   }
 
   $(document).ready(resize);
