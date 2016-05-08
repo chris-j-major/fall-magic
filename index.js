@@ -9,8 +9,12 @@ function nocache(req, res, next) {
   next();
 }
 
-app.use( nocache );
-app.use( morgan('dev') );
+if (app.get('env') == 'production') {
+  app.use(morgan('common', { skip: function(req, res) { return res.statusCode < 400 } }));
+}else{
+  app.use( nocache );
+  app.use( morgan('dev') );
+}
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
@@ -20,6 +24,8 @@ app.use("/common",express.static('common'));
 
 app.use("/dynamic", require("./private") );
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+
+app.set('port', (process.env.PORT || 3000));
+app.listen(app.get('port'), function () {
+  console.log('"fall-magic" listening on "'+app.get('port')+'"');
 });
