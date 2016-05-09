@@ -31,7 +31,7 @@
       return $e;
     },
     function updatePhrase( $parent , $elem , item , index   ){
-      $elem.text( item.title )
+      $elem.text( item.id )
       if ( ! item.color ){
         item.color = phraseColorList.pop();
       }
@@ -43,9 +43,11 @@
   $toolbox.on("mousedown touchstart",".notes",function(event){
     event.preventDefault();
     // start draggin these notes
-    var index = jQuery.data( $(event.currentTarget)[0] , "index" );
+    var notesObj = $(event.currentTarget)[0];
+    var index = jQuery.data( notesObj , "index" );
     var note = notes[index];
     startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event , {x:-event.offsetX,y:-event.offsetY} );
+    musicPlayer.setCallback( trackPlaying( $(notesObj) ) );
     musicPlayer.play("/dynamic/notes/"+note.id+".midi");
     return false;
   })
@@ -56,7 +58,7 @@
       return $e;
     },
     function updatePhrase( $parent , $elem , item , index ){
-      $elem.text( item.notes.title )
+      $elem.text( item.notes.id )
       $elem.css( {left: (index*6)+"em" , top:(item.pitch*2)+"em" ,'background-color':item.notes.color});
       $elem.toggleClass("temp",item.temp)
       jQuery.data( $elem[0] , "index" , index );
@@ -146,9 +148,19 @@
       window.msg.error( "error loading notes" );
     });
   $("#play").on('click',function(){
+    musicPlayer.setCallback( trackPlaying( $compose ) );
     musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
   });
 })();
+
+function trackPlaying($target){
+  $target.addClass("playback");
+  return function(ev){
+    var time = ev.time;
+    var n = time / 4.0;
+    $target.css("background-position",n+"em 0em");
+  }
+}
 
 function newDOMBinding( $parent , create , update ){
   var mapping = {};

@@ -3,10 +3,13 @@ window.musicPlayer = (function(){
   return {
     play:function( url ){
       if ( playing ) this.stop();
-      MIDIjs.play(url)
+      MIDIjs.play(url);
     },
     stop:function(){
-      MIDIjs.stop()
-    }    
+      MIDIjs.stop();
+    },
+    setCallback:function(fn){
+      MIDIjs.player_callback = fn;
+    }
   };
 })();

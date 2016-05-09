@@ -1,4 +1,4 @@
-if ( module.exports != null ){
+if ( typeof module !== 'undefined' ){
   module.exports  = inner();
 }else{
   window.data = inner();
