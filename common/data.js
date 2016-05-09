@@ -1,4 +1,4 @@
-if ( window.module != null ){
+if ( module.exports != null ){
   module.exports  = inner();
 }else{
   window.data = inner();
@@ -8,10 +8,10 @@ function inner(){
   function Notes( data ){
     if ( ! data ) data = {};
     /* some notes, 4 bars etc. */
-    this.title = data.title||"[unnamed]";
-    this.notes = [];
+    this.key = data.key||"[unnamed]";
+    this.notes = data.notes;
   }
-  function Phrase(data ){
+  function Phrase(data){
     if ( ! data ) data = {};
     /* a block of music, positioned and keyed */
     this.pitch = data.pitch||4;
@@ -19,24 +19,33 @@ function inner(){
   }
   function Composition( data ){
     if ( ! data ) data = {};
-    /* a collection of phrases and metadata */
-    this.phrases = [];
-    this.key = "C";
-  }
-  Composition.prototype.toJSON = function(){
-    return {
-      key:this.key,
-      phrases:this.phrases.map(function(p){
-        return {
-          pitch:p.pitch,
-          notes:p.notes.title
-        }
-      })
+    if ( typeof data === 'string' ){
+      // pharse the string data
+      var block = data.split(":");
+      this.key = block.splice(0,1)[0];
+      this.phrases = block.map(function(str){
+        // build phrase structure here...
+        var s = str.split("-");
+        return new Phrase({
+          pitch:parseInt(s[0]),
+          notes:s[1]
+        });
+      });
+    }else{
+      /* a collection of phrases and metadata */
+      this.phrases = data.phrases||[];
+      this.key = data.key||"C";
     }
+  }
+  Composition.prototype.toString = function(){
+    return this.key+":"+
+      this.phrases.map(function(p){
+        return p.pitch+"-"+p.notes.id;
+      }).join(":");
   }
 
   return {
-    Notes,Notes,
+    Notes:Notes,
     Phrase:Phrase,
     Composition:Composition
   };

@@ -1,7 +1,5 @@
 var Midi = require('jsmidgen');
 
-var noteMatcher = /([A-F])([0-9]*)-([0-9]+)/i;
-
 const baseScale = "C,C#,D,D#,E,F,G,G#,A,A#,B,".split(",");
 
 //{ a:21, b:23, c:12, d:14, e:16, f:17, g:19 }
@@ -14,7 +12,7 @@ module.exports = {
     file.addTrack(track);
 
     if ( composition.notes ){
-      addNotes( composition.notes , 0 );
+      addNotes( composition.notes , 0 /* default pitch */);
     }else if ( composition.phrases ){
       for ( var i=0;i<composition.phrases.length;i++){
         var phrase = composition.phrases[i];
@@ -23,17 +21,28 @@ module.exports = {
     }
 
     function addNotes( notes , shift ){
+      var curNote = null;
       for ( var i=0 ; i<notes.length ; i++ ){
-        // splitthe noite syntax.
-        var match = notes[i].match( noteMatcher );
-        if ( match ){
-          var length = parseInt(match[3]) * 64;
-          var note = match[1];
-          var octave = match[2]|"4";
-          var combine = shift + baseScale.indexOf(note.toUpperCase())+(octave*12);
-          track.addNote(0,combine, length);
+        var char = notes[i];
+        if ( char === "-" ){
+          // extend...
+          if ( curNote ){
+            curNote.length ++
+          }
+        }else if ( char === " " ){
+          addNote(curNote);
+          curNote = { length:1 , pitch:-1};
         }else{
-          console.log("WTF:"+notes[i] );
+          addNote(curNote);
+          curNote = { length:1 , pitch:shift + baseScale.indexOf(char.toUpperCase())+(8*12)};
+        }
+      }
+      addNote(curNote);
+      function addNote(details){
+        if ( details ){
+          if ( details.pitch > -1 ){
+            track.addNote(0,details.pitch, details.length*32 );
+          }
         }
       }
     }

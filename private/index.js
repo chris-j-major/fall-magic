@@ -5,6 +5,8 @@ var route = express.Router();
 var database = require("./database");
 var play = require("./play");
 
+var common = require('../common/data.js')
+
 route.get("/notes",function(req,res,next){
   database.getNotes( 5 , function(notes){
     res.send(notes);
@@ -34,9 +36,10 @@ route.get("/notes/:id.midi",function(req,res,next){
 
 route.get("/toMidi/:data",function(req,res,next){
   res.setHeader("content-type", "audio/midi");
-  var data = JSON.parse(req.params.data);
+  var data = new common.Composition(req.params.data);
   var phraseSet = {};
   var phraseList = [];
+  console.log(data);
   data.phrases.map(function(p){
     if ( phraseSet[p.notes] == null ){
       phraseSet[p.notes] = {};

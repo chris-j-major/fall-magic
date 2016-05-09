@@ -46,7 +46,7 @@
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
     var note = notes[index];
     startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event , {x:-event.offsetX,y:-event.offsetY} );
-    musicPlayer.play("/dynamic/notes/"+note.title+".midi");
+    musicPlayer.play("/dynamic/notes/"+note.id+".midi");
     return false;
   })
 
@@ -146,7 +146,7 @@
       window.msg.error( "error loading notes" );
     });
   $("#play").on('click',function(){
-    musicPlayer.play("/dynamic/toMidi/"+JSON.stringify(activeComposition.toJSON()) );
+    musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
   });
 })();
 

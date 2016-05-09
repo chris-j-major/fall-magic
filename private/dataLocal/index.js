@@ -1,25 +1,21 @@
 var notes = [
-  { title:"A" , notes:[
-    "A-1","C-2","A-1",
-    "C-2","A-1","B-1",
-    "B-1","A-1","B-1","A-1",
-    "C-2","A-1","B-1"] },
-  { title:"B" , notes:[
-    "A-2","C-1","A-1",
-    "C-2","B-2",
-    "B-1","A-2","A-1",
-    "C-1","A-1","B-2"] },
-  { title:"C" , notes:[
-    "A-4",
-    "B-4",
-    "C-4",
-    "B-4"] },
-  { title:"D" , notes:[
-    "A-4",
-    "B-4",
-    "C-4",
-    "B-4"] },
+  { id:"A" , notes:"AC-AC-ABBABAC-AB" },
+  { id:"B" , notes:"A-CAC-B-BA-ACAB-" },
+  { id:"C" , notes:"A--BA--CA--BA--D" },
+  { id:"D" , notes:"A---B---C---D---" },
+//  { id:"E" , notes:"A-  B-  C-  D-  " }
 ];
+
+var graph = {};
+
+function addToGraph(src,dest){
+  if ( !graph[src] ) graph[src] = {};
+  if ( graph[src][dest] ){
+    graph[src][dest] = 1;
+  }else{
+    graph[src][dest] += 1;
+  }
+}
 
 module.exports = {
   getNotes:function(n,callback){
@@ -36,13 +32,15 @@ module.exports = {
   getNoteSet:function(id,callback){
     var retval = null;
     for ( var i=0;i<notes.length;i++ ){
-      if ( notes[i].title == id ){
+      if ( notes[i].id == id ){
         retval = notes[i];
       }
     }
     setTimeout(function(){
       callback(retval);
-
     },500);
+  },
+  submitSet:function(sequence){
+
   }
 };
