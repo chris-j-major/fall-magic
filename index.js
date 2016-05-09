@@ -4,7 +4,6 @@ var app = express();
 
 const ONE_DAY = 86400000;
 
-
 function nocache(req, res, next) {
   res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   res.header('Expires', '-1');

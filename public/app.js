@@ -1,5 +1,10 @@
 (function(){/*IFFEY*/
 
+  var phraseColorList = [
+    "#ff0000","#00ff00","#0000ff",
+    "#aa8800","#00aa88","#8800aa",
+    "#440000","#004400","#000044"];
+
   var $toolbar = $("#toolbar");
   var $main = $("#main");
   var $toolbox = $("#toolbox");
@@ -27,6 +32,10 @@
     },
     function updatePhrase( $parent , $elem , item , index   ){
       $elem.text( item.title )
+      if ( ! item.color ){
+        item.color = phraseColorList.pop();
+      }
+      $elem.css("background-color",item.color);
       jQuery.data( $elem[0] , "index" , index );
     }
   );
@@ -48,7 +57,7 @@
     },
     function updatePhrase( $parent , $elem , item , index ){
       $elem.text( item.notes.title )
-      $elem.css( {left: (index*6)+"em" , top:(item.pitch*2)+"em" });
+      $elem.css( {left: (index*6)+"em" , top:(item.pitch*2)+"em" ,'background-color':item.notes.color});
       $elem.toggleClass("temp",item.temp)
       jQuery.data( $elem[0] , "index" , index );
     }
