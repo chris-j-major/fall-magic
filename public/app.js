@@ -11,14 +11,15 @@
   var $compose = $("#compose");
   var $dragOutline = $("#dragOutline");
   var $offsetSpacer = $("#offsetSpacer");
+  var $window = $(window);
 
   var activeComposition = new data.Composition();
   var notes = [];
 
 
   function resize(){
-    var height = $(window).height();
-    var width = $(window).width();
+    var height = $window.height();
+    var width = $window.width();
     $main.height( height - $main.offset().top );
     $main.width( width );
     $toolbox.height( $main.height() );
@@ -28,6 +29,11 @@
   var notesDOM = newDOMBinding( $toolbox ,
     function createNotes( $parent , item){
       var $e = $("<div>").addClass("notes");
+      $e.touchInit({
+        preventDefault: true,
+        mouse: true,
+        pen: true,
+        maxtouch: 1});
       return $e;
     },
     function updatePhrase( $parent , $elem , item , index   ){
@@ -40,21 +46,28 @@
     }
   );
   notesDOM( notes );
-  $toolbox.on("mousedown touchstart",".notes",function(event){
+  $toolbox.on("touch_start",".notes",function(event){
     event.preventDefault();
     // start draggin these notes
     var notesObj = $(event.currentTarget)[0];
     var index = jQuery.data( notesObj , "index" );
     var note = notes[index];
-    startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event , {x:-event.offsetX,y:-event.offsetY} );
+    var offset = $(event.currentTarget).offset();
+    startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event ,
+      {x:offset.left-event.pageX,y:offset.top-event.pageY} );
     musicPlayer.setCallback( trackPlaying( $(notesObj) ) );
     musicPlayer.play("/dynamic/notes/"+note.id+".midi");
     return false;
-  })
+  });
 
   var compositionDOM = newDOMBinding( $compose ,
     function createPhrase( $parent , item){
       var $e = $("<div>").addClass("phrase");
+      $e.touchInit({
+        preventDefault: true,
+        mouse: true,
+        pen: true,
+        maxtouch: 1});
       return $e;
     },
     function updatePhrase( $parent , $elem , item , index ){
@@ -65,17 +78,16 @@
     }
   );
   compositionDOM( activeComposition.phrases );
-  $compose.on("mousedown touchstart",".phrase",function(event){
+  $compose.on("touch_start",".phrase",function(event){
     // start draggin these notes
     event.preventDefault();
     var index = jQuery.data( $(event.currentTarget)[0] , "index" );
+    var offset = $(event.currentTarget).offset();
     var phrase = activeComposition.phrases[index];
     compositionDOM( activeComposition.phrases ); // update the display...
-    console.log(event);
-    startDrag( phrase ,event , {x:-event.offsetX,y:-event.offsetY} );
+    startDrag( phrase ,event ,{x:offset.left-event.pageX,y:offset.top-event.pageY} );
     return false;
   });
-
 
   var draggingPhrase = null;
   var dragOffset = null;
@@ -83,7 +95,7 @@
     draggingPhrase = phrase;
     draggingPhrase.temp = true;
     dragOffset = offset;
-    $(window).on("mousemove",dragMouseOver).on("mouseup touchend",dragMouseUp);
+    $(event.currentTarget).on("touch_move",dragMouseOver).on("touch_end",dragMouseUp);
     $dragOutline.removeClass("hidden").css({ left:event.pageX+dragOffset.x, top:event.pageY+dragOffset.y });
   }
 
@@ -123,12 +135,14 @@
   }
   function dragMouseUp(event){
     event.preventDefault();
-    $(window).off("mousemove",dragMouseOver);
-    $(window).off("mouseup",dragMouseUp);
+    $window.off("touch_move",dragMouseOver);
+    $window.off("touch_end",dragMouseUp);
     $dragOutline.addClass("hidden");
 
     // clear the drag settings
-    draggingPhrase.temp = false;
+    if ( draggingPhrase ){
+      draggingPhrase.temp = false;
+    }
     draggingPhrase = null;
 
     compositionDOM( activeComposition.phrases ); // update the display]
