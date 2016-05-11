@@ -27,7 +27,9 @@ route.get("/notes/:id.midi",function(req,res,next){
   res.setHeader("content-type", "audio/midi");
   database.getNoteSet( req.params.id , function(notes){
     if ( notes ){
-      res.status(200).send( new Buffer( play.toBytes( notes ) ,'binary') );
+      var m = play.toMusic( notes );
+      console.log(m);
+      res.status(200).send( new Buffer( m.toMidiBytes() ,'binary') );
     }else{
       res.status(404).send(null);
     }
@@ -39,7 +41,6 @@ route.get("/toMidi/:data",function(req,res,next){
   var data = new common.Composition(req.params.data);
   var phraseSet = {};
   var phraseList = [];
-  console.log(data);
   data.phrases.map(function(p){
     if ( phraseSet[p.notes] == null ){
       phraseSet[p.notes] = {};
@@ -58,7 +59,9 @@ route.get("/toMidi/:data",function(req,res,next){
     data.phrases = data.phrases.map(function(p){
       return { notes: phraseSet[p.notes].notes , pitch:p.pitch };
     });
-    res.status(200).send( new Buffer( play.toBytes( data ) ,'binary') );
+    var m = play.toMusic( data );
+    m.chordify();
+    res.status(200).send( new Buffer( m.toMidiBytes() ,'binary') );
   });
 });
 
