@@ -114,10 +114,10 @@ Bar.prototype.toMidi = function( track ){
   this.notes.map(function(n){
     if (  n.note ){
       track.noteOn(0, n.note.midi() , delay , 90 );
-      track.noteOff(0, n.note.midi() , n.length * 32 );
+      track.noteOff(0, n.note.midi() , n.length * 64 );
       delay = 0;
     }else{
-      delay += n.length * 32;
+      delay += n.length * 64;
     }
   })
   if ( this.chord ){
