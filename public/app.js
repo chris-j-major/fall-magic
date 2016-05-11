@@ -55,7 +55,7 @@
     var offset = $(event.currentTarget).offset();
     startDrag( new data.Phrase( { pitch:1 , notes:note } ) , event ,
       {x:offset.left-event.pageX,y:offset.top-event.pageY} );
-    musicPlayer.setCallback( trackPlaying( $(notesObj) ) );
+    musicPlayer.setCallback( trackPlaying( $(notesObj) , 8 ) );
     musicPlayer.play("/dynamic/notes/"+note.id+".midi");
     return false;
   });
@@ -162,17 +162,23 @@
       window.msg.error( "error loading notes" );
     });
   $("#play").on('click',function(){
-    musicPlayer.setCallback( trackPlaying( $compose ) );
-    musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
+    if ( activeComposition.phrases.length > 0 ){
+      musicPlayer.setCallback( trackPlaying( $compose , 8 ) );
+      musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
+    }
   });
 })();
 
-function trackPlaying($target){
-  $target.addClass("playback");
+function trackPlaying($target,scale){
   return function(ev){
     var time = ev.time;
-    var n = time / 4.0;
-    $target.css("background-position",n+"em 0em");
+    if ( time > 0 ){
+      var n = time * scale;
+      $target.addClass("playback");
+      $target.css("background-position",n+"em 0em");
+    }else{
+      $target.removeClass("playback");
+    }
   }
 }
 

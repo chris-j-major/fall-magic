@@ -3,6 +3,7 @@ var notes = [
   { id:"B" , notes:"A-CAC-B-BA-ACAB-" },
   { id:"C" , notes:"A--BA--CA--BA--D" },
   { id:"D" , notes:"A---B---C---D---" },
+  { id:"F" , notes:"CBA-CBA-CBA-ABC-" },
 //  { id:"E" , notes:"A-  B-  C-  D-  " }
 ];
 
