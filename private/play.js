@@ -108,7 +108,27 @@ Bar.prototype.addNote = function( note , length  ){
   }
 };
 Bar.prototype.chordify = function () {
-  this.chord = this.notes[0].note.chord().notes();
+  var bar = this;
+  var majorOptions = this.pitches.map( function(n){ return n.chord('major')});
+  var minorOptions = this.pitches.map( function(n){ return n.chord('m7')});
+  var allOptions = majorOptions.concat( minorOptions );
+  var scored = allOptions.map(function(chord){
+    var score = 0;
+    var notes = chord.notes().map( function(l){ return l.chroma(); });
+    for ( var id=0;id<bar.notes.length;id++){
+      var n = bar.notes[id].note.chroma();
+      if ( notes.indexOf[n] == -1 ){
+        score = score - 20;
+      }else{
+        score = score + n;
+      }
+    }
+    return { chord:chord , score:score };
+  });
+  var best = scored.sort(function(a,b){ return a.score -b.score; })[0];
+  console.log( best.chord.name );
+  this.chord = best.chord.notes();
+  //this.chord = this.notes[0].note.chord().notes();
 };
 Bar.prototype.toMidi = function( track ){
   if ( this.chord ){
