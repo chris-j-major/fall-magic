@@ -22,19 +22,23 @@ function inner(){
     if ( typeof data === 'string' ){
       // pharse the string data
       var block = data.split(":");
-      this.key = block.splice(0,1)[0];
-      this.phrases = block.map(function(str){
-        // build phrase structure here...
-        var s = str.split("-");
-        return new Phrase({
-          pitch:parseInt(s[0]),
-          notes:s[1]
+      this.scale = block.splice(0,1)[0];
+      if ( block.length == 0 ){
+        this.phrases = [];
+      }else{
+        this.phrases = block.map(function(str){
+          // build phrase structure here...
+          var s = str.split("-");
+          return new Phrase({
+            pitch:parseInt(s[0]),
+            notes:s[1]
+          });
         });
-      });
+      }
     }else{
       /* a collection of phrases and metadata */
       this.phrases = data.phrases||[];
-      this.key = data.key||"C";
+      this.scale = data.scale||"C";
     }
   }
   Composition.prototype.toString = function(){

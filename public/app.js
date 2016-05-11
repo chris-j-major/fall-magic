@@ -11,6 +11,7 @@
   var $compose = $("#compose");
   var $dragOutline = $("#dragOutline");
   var $offsetSpacer = $("#offsetSpacer");
+  var $scale = $("#scale");
   var $window = $(window);
 
   var activeComposition = new data.Composition();
@@ -167,7 +168,12 @@
       musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
     }
   });
+
+  $scale.on('change',function(){
+    activeComposition.scale = $scale.val();
+  })
 })();
+
 
 function trackPlaying($target,scale){
   return function(ev){
