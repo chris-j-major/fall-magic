@@ -122,7 +122,6 @@ const progressions = {
   "VII":["I","II","IV"]
 };
 Bar.prototype.progression = function( followingBars , index ){
-  console.log( "PROGRESSION" , index , followingBars.length );
   if ( followingBars.length == 0 ){
     this.chordP="I";
   }else{
