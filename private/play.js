@@ -3,7 +3,7 @@ var teoria = require('teoria');
 
 var a4 = teoria.note('a4');
 
-var baseScale = "ABCDEFG".split("");
+var baseScale = "CDEFGAB".split("");
 
 module.exports = {
   toMusic:function( composition ){
@@ -26,10 +26,17 @@ function Music(){
   this.bars = [];
   this.lastBar = null;
 }
-Music.prototype.addNote = function( pitch , length ){
+Music.prototype.intervals = function(n){
+  var i = teoria.interval.from(teoria.note('a2'), this.scale.get(n) );
+  return i;
+}
+Music.prototype.addNote = function( pitch , length , transpose ){
   var note = null;
-  if ( typeof pitch == 'number' ){
-    note = this.scale.get( pitch );
+  if ( pitch > -1 ){
+    note = this.scale.get( pitch+1 );
+    if ( note ){
+      note = note.transpose( this.intervals(transpose) );
+    }
   }
   if ( ! this.lastBar ){
     this.lastBar = new Bar( this );
@@ -37,7 +44,7 @@ Music.prototype.addNote = function( pitch , length ){
   }
   this.lastBar.addNote( note , length );
 }
-Music.prototype.addNotes = function( str , pitch ){
+Music.prototype.addNotes = function( str , transpose ){
   var music = this;
   var curNote = null;
   var restLength = 0;
@@ -53,13 +60,13 @@ Music.prototype.addNotes = function( str , pitch ){
       curNote = { length:1 , pitch:-1};
     }else{
       addNote(curNote);
-      curNote = { length:1 , pitch: pitch + baseScale.indexOf(char.toUpperCase() )};
+      curNote = { length:1 , pitch: baseScale.indexOf(char.toUpperCase() )};
     }
   }
   addNote(curNote);
   function addNote(c){
     if ( c ){
-      music.addNote( c.pitch , c.length );
+      music.addNote( c.pitch , c.length , transpose );
     }
   }
 };
@@ -86,7 +93,7 @@ function Bar( music ){
   this.notes = [];
   this.pitches = [];
 }
-Bar.prototype.addNote = function( note , length ){
+Bar.prototype.addNote = function( note , length  ){
   this.length += length;
   this.notes.push({
     note:note,length:length
@@ -101,7 +108,6 @@ Bar.prototype.addNote = function( note , length ){
   }
 };
 Bar.prototype.chordify = function () {
-  var music = this.music;
   this.chord = this.notes[0].note.chord().notes();
 };
 Bar.prototype.toMidi = function( track ){
