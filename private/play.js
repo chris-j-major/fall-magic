@@ -1,5 +1,7 @@
-var Midi = require('jsmidgen');
 var teoria = require('teoria');
+var Midi = require('jsmidgen');
+
+var Sequence = require('./sequence');
 
 var styles = {
   "A":require("./style/a"),
@@ -50,6 +52,7 @@ Music.prototype.addNote = function( pitch , length , transpose ){
   }
   if ( ! this.lastBar ){
     this.lastBar = new Bar( this );
+    this.lastBar.index = this.bars.length;
     this.bars.push( this.lastBar );
   }
   this.lastBar.addNote( note , length );
@@ -89,15 +92,24 @@ Music.prototype.chordify = function(){
   }
   this.bars.map(function(bar){ bar.chordify() });
 }
+Music.prototype.toSequence = function(){
+  var s = new Sequence();
+  this.bars.map( function(bar){
+    bar.toSequence( s );
+  });
+//  s.startBlock(); // add an bar at the end...
+//  s.sustain(this.baseNote,0,this.beatsInBar,0); // with a whole length silent note
+  return s;
+}
+Music.prototype.toString = function(){
+  return this.toSequence().toString();
+}
 Music.prototype.toMidiBytes = function(){
   var file = new Midi.File();
   var track = new Midi.Track();
   file.addTrack(track);
 
-  this.bars.map( function(bar){
-    bar.toMidi( track );
-  });
-
+  this.toSequence().toMidi( track);
 
   return file.toBytes();
 }
@@ -106,6 +118,7 @@ Music.prototype.toMidiBytes = function(){
 function Bar( music ){
   this.music = music;
   this.length = 0;
+  this.index = 0;
   this.notes = [];
   this.pitches = [];
 }
@@ -188,31 +201,36 @@ Bar.prototype.chordify = function () {
   //this.chord = best.chord.notes();
   //this.chord = this.notes[0].note.chord().notes();
 };
-Bar.prototype.toMidi = function( track ){
+Bar.prototype.toSequence = function( seq ){
+  seq.startBlock(); // e.g. all times relative to now.
   var music = this.music;
+  var bar = this;
   if ( this.chord ){
-    var noteIndex = 0;
-    this.chord.map(function(n){
-      var vel = music.chordVel[ noteIndex++ ];
-      if ( vel > 0 ){
-        track.noteOn(0, n.midi() , 0 , vel );
+    // we have a chord
+    var rhythm = music.style.getRhythmMaps( this.index , this.pChord );
+    var time = 0;
+    for ( var i=0;i<rhythm.length;i++){
+      var n = rhythm[i];
+      if ( n == " "){ // a spave is a rest
+        time++;
+      }else{
+        var len = parseInt(n);
+        var chordIndex = 0;
+        bar.chord.map(function(n){
+          var vel = music.chordVel[chordIndex++];
+          seq.sustain( n , time , len , vel);
+        });
+        time += len;
       }
-    });
+    }
   }
-  var delay = 0;
+  // now do the melody
+  var time = 0;
   this.notes.map(function(n){
     if ( n.note ){
-      track.noteOn(0, n.note.midi() , delay , 90 );
-      track.noteOff(0, n.note.midi() , n.length * 64 );
-      delay = 0;
-    }else{
-      delay += n.length * 64;
+      seq.sustain( n.note , time , n.length , 90 );
     }
-  })
-  if ( this.chord ){
-    this.chord.map(function(n){
-      track.noteOff(0, n.midi() , delay );
-      delay = 0; // note - the first note off needs the delay in case we end on a rest.
-    });
-  }
+    time += n.length;
+  });
+  seq.pushTime( music.beatsInBar ); // ensure the whole bar is recorded
 }

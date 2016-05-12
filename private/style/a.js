@@ -10,6 +10,9 @@ module.exports = {
   getChordVelArray:function(){
     return [50,30,20];
   },
+  getRhythmMaps:function( index , prog ){
+    return "13";
+  },
   getChordPMap:function(){
     return {
       "I":"A",

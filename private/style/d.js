@@ -8,7 +8,10 @@ module.exports = {
     return teoria.note('a2');
   },
   getChordVelArray:function(){
-    return [50,30,20];
+    return [20,80,20];
+  },
+  getRhythmMaps:function( index , prog ){
+    return "1 2";
   },
   getChordPMap:function(){
     return {
