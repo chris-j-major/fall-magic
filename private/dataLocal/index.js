@@ -1,10 +1,10 @@
 var notes = [
-  { id:"A" , notes:"AC-AC-ABBABAC-AB" },
+//  { id:"A" , notes:"ABCDEFGaaGFEDCBA" },
   { id:"B" , notes:"A-CAC-B-BA-ACAB-" },
   { id:"C" , notes:"A--BA--CA--BA--D" },
   { id:"D" , notes:"A---B---C---D---" },
   { id:"F" , notes:"CBA-CBA-CBA-ABC-" },
-//  { id:"E" , notes:"A-  B-  C-  D-  " }
+  { id:"E" , notes:"A-  B-  C-  D-  " }
 ];
 
 var graph = {};

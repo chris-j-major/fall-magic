@@ -3,7 +3,7 @@ var teoria = require('teoria');
 
 var a4 = teoria.note('a4');
 
-var baseScale = "CDEFGAB".split("");
+var baseScale = "ABCDEFGabcdefg".split("");
 
 module.exports = {
   toMusic:function( composition ){
@@ -34,7 +34,7 @@ Music.prototype.addNote = function( pitch , length , transpose ){
   var note = null;
   if ( pitch > -1 ){
     note = this.scale.get( pitch+1 );
-    if ( note ){
+    if ( note && transpose ){
       note = note.transpose( this.intervals(transpose) );
     }
   }
@@ -60,7 +60,7 @@ Music.prototype.addNotes = function( str , transpose ){
       curNote = { length:1 , pitch:-1};
     }else{
       addNote(curNote);
-      curNote = { length:1 , pitch: baseScale.indexOf(char.toUpperCase() )};
+      curNote = { length:1 , pitch: baseScale.indexOf(char)};
     }
   }
   addNote(curNote);
@@ -72,6 +72,7 @@ Music.prototype.addNotes = function( str , transpose ){
 };
 Music.prototype.chordify = function(){
   // work backwards through the bars
+  var music = this;
   var bars = this.bars.length;
   for ( var i=bars-1 ; i>=0 ; i--){
     this.bars[i].progression( this.bars.slice(i+1, bars) , i );
@@ -113,57 +114,86 @@ Bar.prototype.addNote = function( note , length  ){
   }
 };
 const progressions = {
-  "I":["I","V","VII"],
-  "II":["I","VI",],
-  "III":["I","VII"],
-  "IV":["I","IV"],
-  "V":["I","II","IV"],
-  "VI":["I","VI"],
-  "VII":["I","II","IV"]
+  "I":["I","V","vii"],
+  "ii":["I","vi"],
+  "iii":["I","vii"],
+  "IV":["I","vi"],
+  "V":["I","ii","IV"],
+  "vi":["I","iii"],
+  "vii":["I","ii","IV"]
+};
+const chordPMap = {
+  "I":"A",
+  "ii":"Bb",
+  "iii":"C",
+  "IV":"D",
+  "V":"E",
+  "vi":"F",
+  "vii":"G"
 };
 Bar.prototype.progression = function( followingBars , index ){
   if ( followingBars.length == 0 ){
-    this.chordP="I";
+    this.chordP = "I";
+  }else if ( followingBars.length == 1 ){
+    this.chordP = "V";
   }else{
     var nextBar = followingBars[0];
     var options = progressions[nextBar.chordP];
-    var ix = Math.floor(Math.random()*options.length);
-    this.chordP = options[ix];
+    this.chordP = this.getBestChroma( options );
   }
 };
-Bar.prototype.chordify = function () {
-  console.log(this.chordP);
-  var bar = this;
-  var majorOptions = this.pitches.map( function(n){ return n.chord('major')});
-  var minorOptions = this.pitches.map( function(n){ return n.chord('m7')});
-  var allOptions = majorOptions.concat( minorOptions );
-  var scored = allOptions.map(function(chord){
-    var score = 0;
-    var notes = chord.notes().map( function(l){ return l.chroma(); });
-    for ( var id=0;id<bar.notes.length;id++){
-      var n = bar.notes[id].note.chroma();
-      if ( notes.indexOf[n] == -1 ){
-        score = score - 20;
-      }else{
-        score = score + n;
-      }
+Bar.prototype.getBestChroma = function (options) {
+  var best = options[0];
+  var score = this.scoreChord( options[0] );
+  for ( var i=1;i<options.length;i++){
+    var s = this.scoreChord( options[i] ) + Math.random();
+    if ( s > score ){
+      best = options[i];
     }
-    return { chord:chord , score:score };
-  });
-  var best = scored.sort(function(a,b){ return a.score -b.score; })[0];
-  console.log( best.chord.name );
-  this.chord = best.chord.notes();
+  }
+  return best;
+};
+const chordNoteWeightings = [ 10 , -3 , 5 , 3 ];
+Bar.prototype.scoreChord = function( pchord ){
+  var bar = this;
+  var score = 0;
+  var chordName = chordPMap[pchord];
+  var chordNotes = teoria.chord(chordName).notes();
+  var noteScore = {};
+  for ( var n=0;n< chordNotes.length;n++){
+    var c = chordNotes[n].chroma();
+    noteScore[c] = Math.max(chordNoteWeightings[n],noteScore[c]||-1);
+  }
+  for ( var id=0;id<bar.notes.length;id++){
+    var na = bar.notes[id].note;
+    if (na){ // ignore rests
+      var n = na.chroma();
+      var cp = noteScore[n];
+      var sc = 50 * bar.notes[id].length;
+      if ( !cp ){
+        cp = -1;
+        noteScore[n] = -1;
+      }
+      score = score + (sc * cp );
+    }
+  }
+  return score;
+}
+Bar.prototype.chordify = function () {
+  var chord = chordPMap[this.chordP];
+  this.chord = teoria.chord(chord).notes();
+  //this.chord = best.chord.notes();
   //this.chord = this.notes[0].note.chord().notes();
 };
 Bar.prototype.toMidi = function( track ){
   if ( this.chord ){
     this.chord.map(function(n){
-      track.noteOn(0, n.midi() , 0 ,50 );
+      track.noteOn(0, n.midi() , 0 , 50 );
     });
   }
   var delay = 0;
   this.notes.map(function(n){
-    if (  n.note ){
+    if ( n.note ){
       track.noteOn(0, n.note.midi() , delay , 90 );
       track.noteOff(0, n.note.midi() , n.length * 64 );
       delay = 0;
