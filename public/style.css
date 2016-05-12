@@ -39,6 +39,19 @@ htmp, body{
   position:absolute;
 }
 
+#compose.scale-A {
+  background-color: #aaf;
+}
+#compose.scale-B {
+  background-color: #dfa;
+}
+#compose.scale-C {
+  background-color: #afd;
+}
+#compose.scale-D {
+  background-color: #fdd;
+}
+
 #dragOutline {
   border:2px dashed black;
   width:6em;

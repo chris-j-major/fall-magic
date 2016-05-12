@@ -169,9 +169,21 @@
     }
   });
 
+  var scales = ["A","B","C","D"];
   $scale.on('change',function(){
     activeComposition.scale = $scale.val();
-  })
+    for ( var i=0;i<scales.length;i++){
+      var s = scales[i];
+      if ( s == activeComposition.scale ){
+        $compose.addClass( "scale-"+s );
+      }else{
+        $compose.removeClass( "scale-"+s );
+      }
+    }
+  });
+  // defaults
+  $scale.val('A');
+  $compose.addClass( "scale-A" );
 })();
 
 

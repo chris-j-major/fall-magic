@@ -42,7 +42,7 @@ function inner(){
     }
   }
   Composition.prototype.toString = function(){
-    return this.key+":"+
+    return this.scale+":"+
       this.phrases.map(function(p){
         return p.pitch+"-"+p.notes.id;
       }).join(":");

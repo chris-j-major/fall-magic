@@ -1,13 +1,18 @@
 var Midi = require('jsmidgen');
 var teoria = require('teoria');
 
-var a4 = teoria.note('a4');
+var styles = {
+  "A":require("./style/a"),
+  "B":require("./style/b"),
+  "C":require("./style/c"),
+  "D":require("./style/d")
+};
 
 var baseScale = "ABCDEFGabcdefg".split("");
 
 module.exports = {
   toMusic:function( composition ){
-    var m = new Music();
+    var m = new Music( composition.scale );
     if ( composition.notes ){ // notes not phrases...
       m.addNotes( composition.notes , 0 /* default pitch */);
     }else if ( composition.phrases ){
@@ -20,14 +25,19 @@ module.exports = {
   }
 };
 
-function Music(){
-  this.scale = teoria.note('a2').scale('ionian');
+function Music( style ){
+  var style = styles[style]||styles['A'];
+  this.style = style;
+  this.baseNote = style.getBaseNote();
+  this.scale = style.getScale();
+  this.chordVel = style.getChordVelArray();
+  this.chordPMap = style.getChordPMap();
   this.beatsInBar = 4;
   this.bars = [];
   this.lastBar = null;
 }
 Music.prototype.intervals = function(n){
-  var i = teoria.interval.from(teoria.note('a2'), this.scale.get(n) );
+  var i = teoria.interval.from(this.baseNote, this.scale.get(n) );
   return i;
 }
 Music.prototype.addNote = function( pitch , length , transpose ){
@@ -122,15 +132,7 @@ const progressions = {
   "vi":["I","iii"],
   "vii":["I","ii","IV"]
 };
-const chordPMap = {
-  "I":"A",
-  "ii":"Bb",
-  "iii":"C",
-  "IV":"D",
-  "V":"E",
-  "vi":"F",
-  "vii":"G"
-};
+
 Bar.prototype.progression = function( followingBars , index ){
   if ( followingBars.length == 0 ){
     this.chordP = "I";
@@ -155,9 +157,10 @@ Bar.prototype.getBestChroma = function (options) {
 };
 const chordNoteWeightings = [ 10 , -3 , 5 , 3 ];
 Bar.prototype.scoreChord = function( pchord ){
+  var music = this.music;
   var bar = this;
   var score = 0;
-  var chordName = chordPMap[pchord];
+  var chordName = music.chordPMap[pchord];
   var chordNotes = teoria.chord(chordName).notes();
   var noteScore = {};
   for ( var n=0;n< chordNotes.length;n++){
@@ -180,15 +183,20 @@ Bar.prototype.scoreChord = function( pchord ){
   return score;
 }
 Bar.prototype.chordify = function () {
-  var chord = chordPMap[this.chordP];
+  var chord = this.music.chordPMap[this.chordP];
   this.chord = teoria.chord(chord).notes();
   //this.chord = best.chord.notes();
   //this.chord = this.notes[0].note.chord().notes();
 };
 Bar.prototype.toMidi = function( track ){
+  var music = this.music;
   if ( this.chord ){
+    var noteIndex = 0;
     this.chord.map(function(n){
-      track.noteOn(0, n.midi() , 0 , 50 );
+      var vel = music.chordVel[ noteIndex++ ];
+      if ( vel > 0 ){
+        track.noteOn(0, n.midi() , 0 , vel );
+      }
     });
   }
   var delay = 0;
