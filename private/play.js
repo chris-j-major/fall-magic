@@ -37,10 +37,28 @@ function Music( style ){
   this.beatsInBar = 4;
   this.bars = [];
   this.lastBar = null;
+  this.intervalScores = {
+    "P1":50,"P8":50,"P5":50,"d6":50,"d2":50,
+    "M4":40,"m4":40,"M5":40,"m5":40,
+    "M3":30,"m3":30,"M6":30,"m6":30,"d4":30,"d7":30,
+    "P4":-10,"m9":-10,"dd5":-10,
+    "M2":-30,"m7":-30,"M9":-30,"d8":-30,"d3":-30,"A8":-30,
+    "m2":-40,"M7":-40,"m9":-40,
+    "A4":-50,"d5":-50,
+  };
 }
 Music.prototype.intervals = function(n){
   var i = teoria.interval.from(this.baseNote, this.scale.get(n) );
   return i;
+}
+
+Music.prototype.scoreInterval = function(i){
+  if ( !this.intervalScores[i] ){
+    console.log("WTF Intreval "+i);
+    return -50;
+  }else{
+    return this.intervalScores[i];
+  }
 }
 Music.prototype.addNote = function( pitch , length , transpose ){
   var note = null;
@@ -152,59 +170,65 @@ const progressions = {
 };
 
 Bar.prototype.progression = function( followingBars , index ){
+  var music = this.music;
   if ( followingBars.length == 0 ){
     this.chordP = "I";
-  }else if ( followingBars.length == 1 ){
-    this.chordP = "V";
+    this.chord = music.chordPMap["I"][0]; // final chord
+//  }else if ( followingBars.length == 1 ){
+//    this.chordP = "V";
   }else{
     var nextBar = followingBars[0];
     var options = progressions[nextBar.chordP];
-    this.chordP = this.getBestChroma( options );
+    var o = [];
+    options.map(function(n){
+      music.chordPMap[n].map(function(chord){
+        o.push({p:n,chord:chord});
+      })
+    });
+    console.log(" before "+nextBar.chordP+"...");
+    var best = this.getBestScore( o );
+    this.chordP = best.p;
+    this.chord = best.chord;
+    this.chordScore = best.score;
+    console.log("Chose ",best);
   }
 };
-Bar.prototype.getBestChroma = function (options) {
+Bar.prototype.getBestScore = function (options) {
   var best = options[0];
-  var score = this.scoreChord( options[0] );
+  var score = this.scoreChord( options[0].chord );
+  best.score = score;
   for ( var i=1;i<options.length;i++){
-    var s = this.scoreChord( options[i] ) + Math.random();
+    var s = this.scoreChord( options[i].chord ) + Math.random();
     if ( s > score ){
+      score = s;
       best = options[i];
+      best.score = s;
     }
   }
   return best;
 };
-const chordNoteWeightings = [ 10 , -3 , 5 , 3 ];
-Bar.prototype.scoreChord = function( pchord ){
+const chordNoteWeightings = [ 5 , 5 , 5 , 5 ];
+Bar.prototype.scoreChord = function( chordName ){
   var music = this.music;
   var bar = this;
   var score = 0;
-  var chordName = music.chordPMap[pchord];
   var chordNotes = teoria.chord(chordName).notes();
-  var noteScore = {};
-  for ( var n=0;n< chordNotes.length;n++){
-    var c = chordNotes[n].chroma();
-    noteScore[c] = Math.max(chordNoteWeightings[n],noteScore[c]||-1);
-  }
   for ( var id=0;id<bar.notes.length;id++){
     var na = bar.notes[id].note;
     if (na){ // ignore rests
-      var n = na.chroma();
-      var cp = noteScore[n];
-      var sc = 50 * bar.notes[id].length;
-      if ( !cp ){
-        cp = -1;
-        noteScore[n] = -1;
+      for ( var chordNoteId=0;chordNoteId<chordNotes.length;chordNoteId++){
+        var chordNote = chordNotes[chordNoteId];
+        var interval = chordNote.interval(na).simple(true);
+        score += music.scoreInterval( interval.toString() ) * bar.notes[id].length;
       }
-      score = score + (sc * cp );
     }
   }
+  console.log(" "+chordName+" scored "+score);
   return score;
 }
 Bar.prototype.chordify = function () {
-  var chord = this.music.chordPMap[this.chordP];
-  this.chord = teoria.chord(chord).notes();
-  //this.chord = best.chord.notes();
-  //this.chord = this.notes[0].note.chord().notes();
+  console.log("using progression "+this.chordP+" -> "+this.chord+"  ("+this.chordScore+")");
+  this.chordNotes = teoria.chord(this.chord).notes();
 };
 Bar.prototype.toSequence = function( seq ){
   seq.startBlock(); // e.g. all times relative to now.
@@ -221,7 +245,7 @@ Bar.prototype.toSequence = function( seq ){
       }else{
         var len = parseInt(n);
         var chordIndex = 0;
-        bar.chord.map(function(n){
+        bar.chordNotes.map(function(n){
           var vel = music.chordVel[chordIndex++];
           seq.sustain( n , time , len , vel);
         });

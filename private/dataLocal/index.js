@@ -1,5 +1,5 @@
 var notes = [
-//  { id:"A" , notes:"ABCDEFGaaGFEDCBA" },
+  { id:"A" , notes:"ABCDEFGaaGFEDCBA" },
   { id:"B" , notes:"A-CAC-B-BA-ACAB-" },
   { id:"C" , notes:"A--BA--CA--BA--D" },
   { id:"D" , notes:"A---B---C---D---" },
