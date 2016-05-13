@@ -45,9 +45,14 @@ Music.prototype.intervals = function(n){
 Music.prototype.addNote = function( pitch , length , transpose ){
   var note = null;
   if ( pitch > -1 ){
-    note = this.scale.get( pitch+1 );
-    if ( note && transpose ){
-      note = note.transpose( this.intervals(transpose) );
+    try{
+      note = this.scale.get( pitch+1 );
+      if ( note && transpose ){
+        note = note.transpose( this.intervals(transpose) );
+      }
+    }catch(e){
+      console.log("Error in addNote",e,arguments);
+      console.trace(e);
     }
   }
   if ( ! this.lastBar ){

@@ -28,7 +28,6 @@ route.get("/notes/:id.midi",function(req,res,next){
   database.getNoteSet( req.params.id , function(notes){
     if ( notes ){
       var m = play.toMusic( notes );
-      console.log(m);
       res.status(200).send( new Buffer( m.toMidiBytes() ,'binary') );
     }else{
       res.status(404).send(null);

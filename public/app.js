@@ -166,6 +166,7 @@
     if ( activeComposition.phrases.length > 0 ){
       musicPlayer.setCallback( trackPlaying( $compose , 8 ) );
       musicPlayer.play("/dynamic/toMidi/"+activeComposition.toString() );
+      $("#download").attr("href","/dynamic/toMidi/"+activeComposition.toString() );
     }
   });
 
